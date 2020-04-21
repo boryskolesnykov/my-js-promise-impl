@@ -64,9 +64,11 @@ class InnerPromise {
                 if (context.value instanceof Promise) {
                     const innerPromise = context.value.innerPromise;
                     if (innerPromise.status === STATUS_PENDING) {
-                        this.registerResolver(this.thenWrapper, taskAction, context, resolve, reject);
-                        return;
+                        innerPromise.registerResolver(context.thenWrapper, taskAction, innerPromise, resolve, reject);
+                    } else {
+                        context.thenWrapper(taskAction, innerPromise, resolve, reject);
                     }
+                    return;
                 }
                 let result = taskAction(context.value);
                 resolve(result);

@@ -14,6 +14,12 @@ function asyncAdd(a, b) {
     });
 }
 
+const myPromise = new Promise((res, rej) => {
+    setTimeout(() => {
+        res(10);
+    });
+});
+
 asyncAdd(13, 5)
     .then((data) => {
         if (data === 16) {
@@ -28,6 +34,24 @@ asyncAdd(13, 5)
         }
         console.log(`My modified data: ${data + 10}`);
     })
+    .then(() => myPromise)
+    .then((ten) => console.log(`Previous promise value: ${ten}`))
     .catch((err) => console.log(`My err: ${err}`));
 
 console.log("Stack out");
+
+// function asyncSubtract(a, b) {
+//     return new Promise((resolve, reject) => {
+//             resolve(a - b);
+//     });
+// }
+//
+// const myPromise = new Promise((res, rej) => {
+//     setTimeout(() => {
+//         res(10);
+//     }, 2000);
+// });
+//
+// asyncSubtract(10, 1)
+//     .then(() => myPromise)
+//     .then((ten) => console.log(`Previous promise value: ${ten}`));
