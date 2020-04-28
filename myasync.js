@@ -34,6 +34,10 @@ class InnerPromise {
     }
 
     resolve(value) {
+        if (this.status === STATUS_RESOLVED || this.status === STATUS_REJECTED) {
+            return;
+        }
+
         this.value = value;
         this.status = STATUS_RESOLVED;
         for (const resolver of this.resolvers) {
@@ -42,6 +46,10 @@ class InnerPromise {
     }
 
     reject(error) {
+        if (this.status === STATUS_RESOLVED || this.status === STATUS_REJECTED) {
+            return;
+        }
+
         this.error = error;
         this.status = STATUS_REJECTED;
         for (const resolver of this.resolvers) {
@@ -106,6 +114,47 @@ class Promise {
 
     catch(errorAction) {
         return this.innerPromise.catch(errorAction);
+    }
+
+    static resolve() {
+        return new Promise(resolve => resolve());
+    }
+
+    static reject() {
+        return new Promise((resolve, reject) => reject());
+    }
+
+    static all(promises) {
+        return new Promise((resolve, reject) => {
+            try {
+                let counter = promises.length;
+                const result = [];
+                for (let i = 0; i < promises.length; i++) {
+                    promises[i].then((data) => {
+                        try {
+                            result[i] = data;
+                            counter--;
+                            if (counter === 0) {
+                                resolve(result);
+                            }
+                        } catch (e) {
+                            reject(e);
+                        }
+                    });
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    static race(promises) {
+        return new Promise((resolve, reject) => {
+            promises.forEach(promise =>
+                    promise
+                        .then( data => resolve(data) )
+                        .catch( error => reject(error) ));
+        });
     }
 }
 

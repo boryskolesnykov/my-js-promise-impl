@@ -1,5 +1,9 @@
 const Promise = require('./myasync');
 
+function randomDelay() {
+    return (Math.round(Math.random() * 1E4) % 8000) + 1000;
+}
+
 function asyncAdd(a, b) {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
@@ -16,8 +20,39 @@ function asyncAdd(a, b) {
 
 const myPromise = new Promise((res, rej) => {
     setTimeout(() => {
-        res(10);
-    });
+        const nestedPromise = new Promise((resolve, reject) => {
+            resolve(10);
+        });
+        res(nestedPromise);
+    }, randomDelay());
+});
+
+const myPromise1 = new Promise((res, rej) => {
+    setTimeout(() => {
+        const nestedPromise = new Promise((resolve, reject) => {
+            resolve(42);
+        });
+        res(nestedPromise);
+    }, randomDelay());
+});
+
+const myPromise2 = new Promise((res, rej) => {
+    setTimeout(() => {
+        const nestedPromise = new Promise((resolve, reject) => {
+            resolve(69);
+        });
+        res(nestedPromise);
+    }, randomDelay());
+});
+
+Promise.race([myPromise, myPromise1, myPromise2])
+    .then((data) => console.log(`${data} wins!`));
+
+Promise.all([myPromise, myPromise1, myPromise2])
+    .then((values) => console.log(values));
+
+const myLongLastingPromise = new Promise((res) => {
+    setTimeout(() => res(), 6000)
 });
 
 asyncAdd(13, 5)
@@ -36,22 +71,9 @@ asyncAdd(13, 5)
     })
     .then(() => myPromise)
     .then((ten) => console.log(`Previous promise value: ${ten}`))
+    .then(() => myLongLastingPromise)
+    .then(() => console.log('After long wait'))
     .catch((err) => console.log(`My err: ${err}`));
 
 console.log("Stack out");
 
-// function asyncSubtract(a, b) {
-//     return new Promise((resolve, reject) => {
-//             resolve(a - b);
-//     });
-// }
-//
-// const myPromise = new Promise((res, rej) => {
-//     setTimeout(() => {
-//         res(10);
-//     }, 2000);
-// });
-//
-// asyncSubtract(10, 1)
-//     .then(() => myPromise)
-//     .then((ten) => console.log(`Previous promise value: ${ten}`));
