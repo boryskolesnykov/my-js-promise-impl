@@ -14,22 +14,26 @@ class InnerPromise {
     then(taskAction) {
         const that = this;
         return  new Promise((resolve, reject) => {
-            if (that.status === STATUS_PENDING) {
-                this.registerResolver(this.thenWrapper, taskAction, that, resolve, reject);
-            } else {
-                this.thenWrapper(taskAction, that, resolve, reject);
-            }
+            setTimeout(() => {
+                if (that.status === STATUS_PENDING) {
+                    that.registerResolver(that.thenWrapper, taskAction, that, resolve, reject);
+                } else {
+                    that.thenWrapper(taskAction, that, resolve, reject);
+                }
+            });
         });
     }
 
     catch(errorAction) {
         const that = this;
         return  new Promise((resolve, reject) => {
-            if (that.status === STATUS_PENDING) {
-                this.registerResolver(this.catchWrapper, errorAction, that, resolve, reject);
-            } else {
-                this.catchWrapper(errorAction, that, resolve, reject);
-            }
+            setTimeout(() => {
+                if (that.status === STATUS_PENDING) {
+                    that.registerResolver(that.catchWrapper, errorAction, that, resolve, reject);
+                } else {
+                    that.catchWrapper(errorAction, that, resolve, reject);
+                }
+            });
         });
     }
 
@@ -97,15 +101,13 @@ class Promise {
 
     constructor(taskAction) {
         this.innerPromise = new InnerPromise();
-        setTimeout(() => {
-            try {
-                taskAction(
-                    this.innerPromise.resolve.bind(this.innerPromise),
-                    this.innerPromise.reject.bind(this.innerPromise));
-            } catch (e) {
-                this.innerPromise.reject(e);
-            }
-        });
+        try {
+            taskAction(
+                this.innerPromise.resolve.bind(this.innerPromise),
+                this.innerPromise.reject.bind(this.innerPromise));
+        } catch (e) {
+            this.innerPromise.reject(e);
+        }
     }
 
     then(taskAction) {
